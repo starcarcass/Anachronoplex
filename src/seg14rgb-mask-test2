@@ -1,0 +1,899 @@
+#!/usr/bin/python3
+#
+# https://www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/
+#
+
+import board
+import neopixel
+import sys
+import time
+import datetime
+import random
+import math
+
+from PIL import Image
+from PIL import GifImagePlugin
+
+VERSION = "0.1.12"
+
+NDIGIT= 5
+PIXPERDIGIT=92
+N = NDIGIT*PIXPERDIGIT
+
+epoch = datetime.datetime(1970, 1, 1)
+
+dsec = 30
+tnow = datetime.datetime.now()
+target_time = datetime.datetime.now() + datetime.timedelta(0,30)
+
+print("## YYYY-MM-DD HH:MM:SS TZ")
+
+#if len(sys.argv) > 1:
+#  target_time = datetime.datetime.strptime(sys.argv[1], '%Y-%m-%d %H:%M:%S %Z')
+
+pix = neopixel.NeoPixel(board.D18, N, auto_write=False)
+
+words = [
+  "gamer","Bunin","brake","Cheer","gimpy","lilts","Yakut",
+  "execs","chomp","optic","rails","knows","lodes","Pryor",
+  "ameer","Lidia","kited","rocks","wrier","foots","Elmer",
+  "curvy","erect","stags","hocks","front","croon","twist",
+  "Monet","cot's","frost","flesh","sharp","gages","vexes",
+  "musky","appal","Janet","their","smile","Odets","jaw's",
+  "gowns","quasi","chill","thigh","wilts","larch","mount",
+  "tumor","squab","scope","pipit","cloth","overt","robot",
+  "Monte","Pym's","scary","mogul","piety","boner","caste",
+  "rumps","prigs","joint","rooks","vivid","sooty","mutes",
+  "Drano","young","greet","Emacs","Acuff","Ernst","stair",
+  "Lucas","lades","gumbo","Wilde","Beach","nukes","laced",
+  "stunk","rages","knoll","Fox's","pew's","hoops","rusty",
+  "hoses","Angie","waltz","muddy","won't","krone","cameo",
+  "uncle","lotto"]
+
+ctx = {
+  "pix" : pix,
+  "ndigit": NDIGIT,
+  "pixperdigit": PIXPERDIGIT,
+  "n" : N,
+  "dsec" : dsec,
+  "target_time": target_time,
+  "prev_time" : {},
+
+  "segments": "abcdefghijklmn",
+
+  "anim" : "none",
+  "data" : {}
+}
+
+char_seg_map = {
+  "0" : "abfimn", "1" : "efm", "2" : "afghin",
+  "3" : "afghmn", "4" : "bfghm", "5" : "abghmn",
+  "6" : "abghimn", "7" : "afm", "8" : "abfghimn",
+  "9" : "abfghmn",
+
+  "a" : "afghimn", "b" : "bghimn", "c" : "ghin",
+  "d" : "fghimn", "e" : "abfghin", "f" : "eghk",
+  "g" : "acfhmn", "h" : "bghim", "i" : "k",
+  "j" : "fmn", "k" : "dekl", "l" : "dkn",
+  "m" : "ghikm", "n" : "gil", "o" : "ghimn",
+  "p" : "abegi", "q" : "acfhm", "r" : "ghi",
+  "s" : "hln", "t" : "bgin", "u" : "imn",
+  "v" : "ij", "w" : "ijlm", "x" : "ceghjl",
+  "y" : "dfhmn", "z" : "gjn",
+  
+  "A" : "abfghim", "B" : "adfkmnh", "C" : "abin",
+  "D" : "adfkmn", "E" : "abghin", "F" : "abghi",
+  "G" : "abimnh", "H" : "bfghim", "I" : "adkn",
+  "J" : "fimn", "K" : "begil", "L" : "bin",
+  "M" : "bcefim", "N" : "bcfilm", "O" : "abfimn",
+  "P" : "abfghi", "Q" : "abfilmn", "R" : "abfghil",
+  "S" : "abghmn", "T" : "adk", "U" : "bfimn",
+  "V" : "beij", "W" : "bfijlm", "X" : "cejl",
+  "Y" : "bfghk",
+  "Z" : "aejn",
+  
+  "\\" : "cl", "/" : "ej", "'" : "e", '"' : "df"
+}
+
+digit_segment = {
+
+  # top
+  "a" : [8, 0, -1],
+
+  # left up
+  "b" : [9, 16, 1],
+
+  # diag up left
+  "c" : [21, 17, -1],
+
+  # middle vert
+  "d" : [22, 28, 1],
+
+  # up right diag
+  "e" : [33, 29, -1],
+
+  # up right vert
+  "f" : [34, 41, 1],
+
+  # middle horiz, left
+  "g" : [49, 46, -1],
+
+  # middle horiz. right
+  "h" : [45, 42, -1],
+
+  # lower vert left
+  "i" : [50, 57, 1],
+
+  # lower diag left
+  "j" : [58, 62, 1],
+
+  # lower vert
+  "k" : [63, 69, 1],
+
+  # lower diag right
+  "l" : [70, 74, 1],
+
+  # lower right vert
+  "m" : [75, 82, 1],
+
+  # bottom segment (horiz)
+  "n" : [83, 91, 1]
+}
+
+#  0   1   2   3   4   5   6   7   8   9  10
+gif_map = [
+  -1,  8,  7,  6,  5,  4,  3,  2,  1,  0, -1,
+   9, -1, -1, -1, -1, -1, -1, -1, -1, -1, 34,
+  10, -1, 21, -1, -1, 22, -1, -1, 33, -1, 35,
+  11, -1, 20, -1, -1, 23, -1, -1, 32, -1, 36,
+  12, -1, -1, 19, -1, 24, -1, 31, -1, -1, 37,
+  13, -1, -1, 18, -1, 25, -1, 30, -1, -1, 38,
+  14, -1, -1, -1, 17, 26, 29, -1, -1, -1, 39,
+  15, -1, -1, -1, -1, 27, -1, -1, -1, -1, 40,
+  16, -1, -1, -1, -1, 28, -1, -1, -1, -1, 41,
+  -1, 49, 48, 47, 46, -1, 45, 44, 43, 42, -1,
+  50, -1, -1, -1, -1, 63, -1, -1, -1, -1, 75,
+  51, -1, -1, -1, -1, 64, -1, -1, -1, -1, 76,
+  52, -1, -1, -1, 62, 65, 74, -1, -1, -1, 77,
+  53, -1, -1, 61, -1, 66, -1, 73, -1, -1, 78,
+  54, -1, -1, 60, -1, 67, -1, 72, -1, -1, 79,
+  55, -1, 59, -1, -1, 68, -1, -1, 71, -1, 80,
+  56, -1, 58, -1, -1, 69, -1, -1, 70, -1, 81,
+  57, -1, -1, -1, -1, -1, -1, -1, -1, -1, 82,
+  -1, 91, 90, 89, 88, 87, 86, 85, 84, 83, -1,
+]
+
+gif_colon_map = [
+  -1, -1, -1,
+  -1, -1, -1,
+  -1, -1, -1,
+  -1, -1, -1,
+  -1,  0, -1,
+  -1,  1, -1,
+  -1, -1, -1,
+  -1, -1, -1,
+  -1, -1, -1,
+  -1, -1, -1,
+  -1, -1, -1,
+  -1, -1, -1,
+  -1, -1, -1,
+  -1,  2, -1,
+  -1,  3, -1,
+  -1, -1, -1,
+  -1, -1, -1,
+  -1, -1, -1,
+  -1, -1, -1
+];
+
+###
+
+def chunk(seq, size, groupByList=True):
+  func = tuple
+  if groupByList:
+    func = list
+  return [ func(seq[i:i+size]) for i in range(0, len(seq), size) ]
+
+def getPaletteInRgb(img):
+  assert img.mode == 'P', "image should be palette mode"
+  pal = img.getpalette()
+  colors = chunk(pal, 3, False)
+  return colors
+
+def unpack_gif(img):
+  unpack = {
+    "width" : img.width,
+    "height" : img.height,
+    "n_frames" : img.n_frames,
+    "digit_width": 11,
+    "digit_height" : 19,
+    "colon_width": 3,
+    "colon_height": 19,
+    "palette" : {},
+    "duration" : [],
+    "rgb" : []
+  }
+  pal = getPaletteInRgb(img)
+
+  _w = img.width
+  _h = img.height
+  _nf = img.n_frames
+
+  unpack["palette"] = pal
+
+  for frame in range(img.n_frames):
+    img.seek(frame)
+    dat = img.getdata()
+
+    unpack["duration"].append( float(img.info['duration'])/1000.0 )
+
+    a = []
+    for y in range(_h):
+      s = ""
+      for x in range(_w):
+        d = dat[y*_w + x]
+        vv = str(pal[d][0]) + "," + str(pal[d][1]) + "," + str(pal[d][2])
+        s += " " + str(dat[ y*_w + x ]) + ":" + vv
+        a.append([pal[d][0], pal[d][1], pal[d][2]])
+        #print(s)
+    unpack["rgb"].append(a)
+  return unpack
+
+#def animate_gif(pix, gif_fn, dt=-1.0, rep=1):
+#  img = Image.open(gif_fn)
+#  data = unpack_gif(img)
+#  rgb = data["rgb"]
+#  for rep in range(rep):
+#    clear_segment(pix)
+#    for frame_idx in range(len(rgb)):
+#      frame = rgb[frame_idx]
+#      for ii in range(len(frame)):
+#        if gif_map[ii] < 0: continue
+#        pix[ gif_map[ii] ] = ( frame[ii][0], frame[ii][1], frame[ii][2] )
+#      pix.show()
+#      if (dt < 0.0):
+#        time.sleep(data['duration'][frame_idx])
+#      else:
+#        time.sleep(dt)
+
+def animate_gif_tick(ctx, gif_fn, dt = (1.0/120.0)):
+
+  cur = datetime.datetime.now()
+  if ((ctx["anim"] != "animate_gif") or
+      (("fn" in ctx["data"]) and (ctx["data"]["fn"] != gif_fn))):
+    ctx["anim"] = "animate_gif"
+
+    img = Image.open(gif_fn)
+    data = unpack_gif(img)
+    rgb = data["rgb"]
+
+    ctx["data"] = {
+      "fn": gif_fn,
+      "frame_idx":0,
+      "prev_time" : cur,
+      #"next_time": cur + datetime.timedelta(seconds=dt),
+      "next_time": cur,
+      "image": img,
+      "gif_data": data,
+      "gif_width": data["width"],
+      "gif_height": data["height"],
+      "rgb" : rgb,
+      "stride" : data["digit_width"] + data["colon_width"],
+      "dt":dt
+    }
+
+  if ctx["data"]["next_time"] > cur: return
+
+  ctx["data"]["prev_time"] = ctx["data"]["next_time"]
+  ctx["data"]["next_time"] = ctx["data"]["prev_time"] + datetime.timedelta(seconds=ctx["data"]["dt"])
+
+  ##
+
+  _ppd = ctx["pixperdigit"]
+  data = ctx["data"]["gif_data"]
+  img = ctx["data"]["image"]
+  rgb = ctx["data"]["rgb"]
+
+  W = data["width"]
+  H = data["height"]
+
+  frame_idx = ctx["data"]["frame_idx"]
+  pix = ctx["pix"]
+
+  clear_segment(pix)
+  frame = rgb[frame_idx]
+
+  stride = ctx["data"]["stride"]
+
+  for ii in range(len(frame)):
+
+    _w = ii % W
+    _h = int(ii / W)
+
+    dig = int(_w / stride)
+
+    _dw = _w % stride
+    if _dw < data["digit_width"]:
+      dig_offset = _h * data["digit_width"] + (data["digit_width"] - _dw - 1)
+    if gif_map[dig_offset] >= 0:
+      _idx = gif_map[dig_offset] + dig*_ppd
+      pix[_idx] = ( frame[ii][0], frame[ii][1], frame[ii][2] )
+    elif _dw < (data["digit_width"] + data["colon_width"]):
+      pass
+
+
+  n_frame = len(rgb)
+  frame_idx = (frame_idx + 1) % n_frame
+  ctx["data"]["frame_idx"] = frame_idx
+
+
+
+def animate_gif(pix, gif_fn, dt=-1.0):
+  img = Image.open(gif_fn)
+  data = unpack_gif(img)
+
+  rgb = data["rgb"]
+
+  W = data["width"]
+  H = data["height"]
+  stride = data["digit_width"] + data["colon_width"]
+
+  _ppd = PIXPERDIGIT
+
+  clear_segment(pix)
+  pix.show()
+  for frame_idx in range(len(rgb)):
+    frame = rgb[frame_idx]
+
+    for ii in range(len(frame)):
+
+      #_w = (W - (ii % W) - 1)
+      _w = ii % W
+      #_h = (H - int(ii / W) - 1)
+      _h = int(ii / W)
+
+      dig = int(_w / stride)
+
+      _dw = _w % stride
+      if _dw < data["digit_width"]:
+        dig_offset = _h * data["digit_width"] + (data["digit_width"] - _dw - 1)
+        if gif_map[dig_offset] >= 0:
+          _idx = gif_map[dig_offset] + dig*_ppd
+          pix[_idx] = ( frame[ii][0], frame[ii][1], frame[ii][2] )
+      elif _dw < (data["digit_width"] + data["colon_width"]):
+        pass
+
+    pix.show()
+
+    if (dt < 0.0):
+      time.sleep(data['duration'][frame_idx])
+    else:
+      time.sleep(dt)
+
+
+
+def clear_segment(pix, flush=False):
+    for i in range(N):
+        pix[i] = (0, 0, 0)
+    if flush:
+        pix.show()
+
+#animate_gif(pix, "gif/Cylon.gif")
+#animate_gif(pix, sys.argv[1])
+#sys.exit(0)
+
+#tstimg = Image.open("gif/Cylon.gif")
+#print("...")
+#tstdat = unpack_gif(tstimg)
+
+#print(tstdat["width"], tstdat["height"])
+
+#print("loaded")
+#print(tstdat)
+
+
+def clear_digit(pix, dig=0, flush=False):
+    for idx in range(PIXPERDIGIT):
+        pix[ idx + PIXPERDIGIT*dig ] = ( 0, 0, 0 )
+
+def show_segment(pix, segname, col, dig=0, flush=False):
+    seg = digit_segment[segname]
+
+    fudge = -1
+    if seg[2] < 0: fudge = 1
+    for _p in range(seg[0], seg[1]-fudge, seg[2]):
+        p = _p + dig*PIXPERDIGIT
+        pix[p] = (col[0], col[1], col[2])
+    if flush:
+        pix.show()
+
+def show_char(pix, ch, col, dig=0, flush=False):
+    if not ( ch in char_seg_map ):
+        return
+    segnames = char_seg_map[ch]
+    #clear_segment(pix)
+    clear_digit(pix, dig, flush)
+    for sidx in range(len(segnames)):
+        s = segnames[sidx]
+        show_segment(pix, s, col, dig)
+    if flush:
+        pix.show()
+
+
+def show_message(pix, msg, col, flush=False):
+    curdig=NDIGIT-1
+    for msg_idx in range(len(msg)):
+
+        show_char(pix, msg[msg_idx], col, curdig)
+        curdig -= 1
+        if curdig < 0: break
+
+    if flush: pix.show()
+
+
+def heatcolor(pix, pos, temp):
+    t192 = int((temp/255.0)*191)
+    heatramp = t192 & 0x3f
+    heatramp *= 4
+
+    if (t192 > 0x80):
+        pix[pos] = (255,255,heatramp)
+    elif (t192 > 0x40):
+        pix[pos] = (255,heatramp,0)
+    else:
+        pix[pos] = (heatramp,0,0)
+
+def wheel(pos):
+    c = [0,0,0]
+    if (pos < 85):
+        c[0] = pos * 3
+        c[1] = 255 - pos * 3
+        c[2] = 0
+    elif pos < 170:
+        pos -= 85
+        c[0] = 255 - pos*3
+        c[1] = 0
+        c[2] = pos*3
+    else:
+        pos -= 170
+        c[0] = 0
+        c[1] = pos*3
+        c[2] = 255 - pos*3
+    return c
+
+
+def fire(cooling, sparking, speeddelay, ds):
+    heat = []
+    M = PIXPERDIGIT
+    for dig in range(NDIGIT):
+        heat.append([])
+        for i in range(PIXPERDIGIT):
+            heat[dig].append(0)
+
+    start = datetime.datetime.now()
+    while True:
+        for dig in range(NDIGIT):
+            for i in range(M):
+                cooldown = int(random.random()*float(cooling)*10.0/float(N) + 2.0)
+                if cooldown > heat[dig][i]:
+                    heat[dig][i] = 0
+                else:
+                    heat[dig][i] = heat[dig][i] - cooldown
+
+            for k in range(M-1, 2, -1):
+                heat[dig][k] = (heat[dig][k-1] + heat[dig][k-2] + heat[dig][k-2])/3
+
+            if ( int(random.random()*255.0) < sparking ):
+                y = int(random.random()*7.0)
+                heat[dig][y] = heat[dig][y] = int(random.random()*(255-160)) + 160
+
+            for j in range(M):
+                heatcolor(pix,j + M*dig,heat[dig][j])
+
+        pix.show()
+        time.sleep(1.0/30.0)
+
+        cur = datetime.datetime.now()
+        ts = (cur - start).total_seconds()
+        if ts > ds: break
+
+def fire_tick(ctx, _cooling=20, _sparking=100, _speeddelay=50, _dt=1.0/30.0):
+
+  cur = datetime.datetime.now()
+  if ctx["anim"] != "fire":
+    ctx["anim"] = "fire"
+
+    ctx["data"] = {
+      "heat": [],
+      "cooling":_cooling,
+      "sparking":_sparking,
+      "speeddelay":_speeddelay,
+      "prev_time" : cur,
+      "next_time": cur + datetime.timedelta(seconds=_dt),
+      "dt":_dt
+    }
+
+    for dig in range(ctx["ndigit"]):
+      ctx["data"]["heat"].append([])
+      for i in range(ctx["pixperdigit"]):
+        ctx["data"]["heat"][dig].append(0)
+
+  if ctx["data"]["next_time"] > cur: return
+
+  ctx["data"]["prev_time"] = ctx["data"]["next_time"]
+  ctx["data"]["next_time"] = ctx["data"]["prev_time"] + datetime.timedelta(seconds=ctx["data"]["dt"])
+
+  cooling = ctx["data"]["cooling"]
+  sparking = ctx["data"]["sparking"]
+  speeddelay = ctx["data"]["speeddelay"]
+
+  heat = ctx["data"]["heat"]
+
+  ndigit = ctx["ndigit"]
+  ppd = ctx["pixperdigit"]
+  n = ctx["n"]
+
+  pix = ctx["pix"]
+
+  for dig in range(ndigit):
+    for i in range(ppd):
+      cooldown = int(random.random()*float(cooling)*10.0/float(ppd) + 2.0)
+      if cooldown > heat[dig][i]:
+        heat[dig][i] = 0
+      else:
+        heat[dig][i] = heat[dig][i] - cooldown
+
+    for k in range(ppd-1, 2, -1):
+      heat[dig][k] = (heat[dig][k-1] + heat[dig][k-2] + heat[dig][k-2])/3
+
+    if ( int(random.random()*255.0) < sparking ):
+      y = int(random.random()*7.0)
+      heat[dig][y] = heat[dig][y] = int(random.random()*(255-160)) + 160
+
+    for j in range(ppd):
+      heatcolor(pix,j + ppd*dig,heat[dig][j])
+
+
+def rainbow_tick(ctx, dt=1.0/30.0):
+
+  cur = datetime.datetime.now()
+  if ctx["anim"] != "rainbow":
+    ctx["anim"] = "rainbow"
+
+    ctx["data"] = {
+      "phase":0,
+      "prev_time" : cur,
+      "next_time": cur + datetime.timedelta(seconds=dt),
+      "dt":dt
+    }
+
+  if ctx["data"]["next_time"] > cur: return
+
+  ctx["data"]["prev_time"] = ctx["data"]["next_time"]
+  ctx["data"]["next_time"] = ctx["data"]["prev_time"] + datetime.timedelta(seconds=ctx["data"]["dt"])
+
+  p = ctx["data"]["phase"]
+  n = ctx["n"]
+
+  for i in range(n):
+      c = wheel(int((i+p)%256))
+      ctx["pix"][i] = (c[0], c[1], c[2])
+
+  ctx["data"]["phase"] += 1
+  ctx["data"]["phase"] %= 256
+
+
+
+def fadetoblack_tick(ctx, pos, val):
+    c = ctx["data"]["virtpix"][pos]
+
+    r = c[0]
+    g = c[1]
+    b = c[2]
+
+    if (r<10): r = 0
+    else: r = int(float(r) - (float(r)*float(val)/256.0))
+
+    if (g<10): g = 0
+    else: g = int(float(g) - (float(g)*float(val)/256.0))
+
+    if (b<10): b = 0
+    else: b = int(float(b) - (float(b)*float(val)/256.0))
+
+    if r<0: r = 0
+    if g<0: g = 0
+    if b<0: b = 0
+
+    ctx["data"]["virtpix"][pos] = [r,g,b]
+
+def meteor_tick(ctx, rgb, sz=20, traildecay=10, loopfactor=1, dt=1.0/60.0):
+
+  cur = datetime.datetime.now()
+  if ctx["anim"] != "meteor_tick":
+    ctx["anim"] = "meteor_tick"
+
+    ctx["data"] = {
+      "loopfactor":1,
+      "pos": 0,
+      "virtpix": [],
+      "prev_time" : cur,
+      "next_time": cur + datetime.timedelta(seconds=dt),
+      "traildecay": traildecay,
+      "size": sz,
+      "color":rgb,
+      "dt":dt
+    }
+
+    n = ctx["n"]
+    for i in range(n):
+      ctx["data"]["virtpix"].append( [0,0,0] )
+
+  if ctx["data"]["next_time"] > cur: return
+
+  ctx["data"]["prev_time"] = ctx["data"]["next_time"]
+  ctx["data"]["next_time"] = ctx["data"]["prev_time"] + datetime.timedelta(seconds=ctx["data"]["dt"])
+
+  ppd = ctx["pixperdigit"]
+  ndigit = ctx["ndigit"]
+  pix = ctx["pix"]
+
+  r = ctx["data"]["color"][0]
+  g = ctx["data"]["color"][1]
+  b = ctx["data"]["color"][2]
+
+  pos = ctx["data"]["pos"]
+
+  for dig in range(ndigit):
+
+
+
+    for j in range(ppd):
+      fadetoblack_tick(ctx, j + ppd*dig, ctx["data"]["traildecay"])
+    for j in range(ctx["data"]["size"]):
+      if ((pos-j)<ppd) and ((pos-j)>=0):
+        #pix[(i-j) + ppd*dig] = (r,g,b)
+        ctx["data"]["virtpix"][(pos-j) + ppd*dig] = [r,g,b]
+
+  ctx["data"]["pos"] += 1
+  #ctx["data"]["pos"] %= 2*ppd
+  ctx["data"]["pos"] %= int(ctx["data"]["loopfactor"]*ppd)
+
+  for i in range(ctx["n"]):
+    v = ctx["data"]["virtpix"][i]
+    pix[i] = (v[0], v[1], v[2])
+
+
+
+def running_lights_tick(ctx, rgb=[255,0,0], wavedelay=1.0/30.0, scale=1.0):
+
+  cur = datetime.datetime.now()
+  if ctx["anim"] != "running_lights":
+    ctx["anim"] = "running_lights"
+
+    ctx["data"] = {
+      "prev_time" : cur,
+      "next_time": cur + datetime.timedelta(seconds=wavedelay),
+      "phase":0,
+      "color":rgb,
+      "wavedelay":wavedelay,
+      "scale":scale
+    }
+
+  if ctx["data"]["next_time"] > cur: return
+
+  ctx["data"]["prev_time"] = ctx["data"]["next_time"]
+  ctx["data"]["next_time"] = ctx["data"]["prev_time"] + datetime.timedelta(seconds=ctx["data"]["wavedelay"])
+
+  n = ctx["n"]
+  pos = ctx["data"]["phase"]
+
+  r = ctx["data"]["color"][0]
+  g = ctx["data"]["color"][1]
+  b = ctx["data"]["color"][2]
+
+  for i in range(n):
+    _f = scale*float((i + pos) % n) / float(n)
+    f = float(2.0*math.pi*_f)
+    _r = int(((math.sin(f) * 127 + 128)/255)*r)
+    _g = int(((math.sin(f) * 127 + 128)/255)*g)
+    _b = int(((math.sin(f) * 127 + 128)/255)*b)
+    if _r<0: _r=0
+    if _g<0: _g=0
+    if _b<0: _b=0
+    if _r>255: _r = 255
+    if _g>255: _g = 255
+    if _b>255: _b = 255
+    pix[i] = (_r, _g, _b)
+
+  ctx["data"]["phase"] += 1
+  ctx["data"]["phase"] %= ctx["n"]
+
+
+
+def fade_tick(ctx, rgb=[255,0,0], time_factor=1):
+
+    cur = datetime.datetime.now()
+
+    if ctx["anim"] != "fade":
+        ctx["anim"] = "fade"
+        ctx["data"] = {
+            "color" : rgb,
+            "time_factor": time_factor
+        }
+
+    tfac = ctx["data"]["time_factor"]
+    del_ms = (1.0 - ((tfac*time.time())%1))
+
+    fade_col = [ int(rgb[0]*del_ms), int(rgb[1]*del_ms), int(rgb[2]*del_ms) ]
+    color_tick(ctx, fade_col)
+
+def rand_color_tick(ctx):
+
+    cur = datetime.datetime.now()
+
+    if ctx["anim"] != "rand_color":
+        ctx["anim"] = "rand_color"
+        ctx["data"] = {
+            "prev_time": cur,
+            "dt" : -1
+        }
+
+    ts = (cur - ctx["data"]["prev_time"]).total_seconds()    
+    if ts < ctx["data"]["dt"]:
+        return
+    ctx["data"]["prev_time"] = cur
+    ctx["data"]["dt"] = .1 + random.random() * .15
+
+    segs = ctx["segments"]
+    for dig in range(ctx["ndigit"]):
+        for s in segs:
+            randrgb = [ int(random.random()*255.0),
+                        int(random.random()*255.0),
+                        int(random.random()*255.0) ]
+            show_segment(pix, s, randrgb, dig, False)
+
+
+def color_tick(ctx, rgb):
+    pix = ctx["pix"]
+
+    for dig in range(ctx["ndigit"]):
+        for seg in ctx["segments"]:
+            show_segment(pix, seg, rgb, dig)
+
+
+def mask_digit(ctx, ch, dig=0, rgb=[0,0,0]):
+    if not (ch in char_seg_map): return
+
+    pix = ctx["pix"]
+
+    all_segments = ctx["segments"]
+    segnames = char_seg_map[ch]
+
+    for s in all_segments:
+        if s in segnames: continue
+
+        show_segment(pix, s, rgb, dig)
+
+def invert_mask_digit(ctx, ch, dig=0, rgb=[0,0,0]):
+    if not (ch in char_seg_map): return
+
+    pix = ctx["pix"]
+
+    all_segments = ctx["segments"]
+    segnames = char_seg_map[ch]
+
+    for s in all_segments:
+        if s in segnames:
+            show_segment(pix, s, rgb, dig)
+
+
+def mask_message(ctx, msg, invertFlag = False):
+
+    curdig = ctx["ndigit"] - 1
+    for msg_idx in range(len(msg)):
+        
+        ch = msg[msg_idx]
+        if invertFlag: invert_mask_digit(ctx, ch, curdig)
+        else: mask_digit(ctx, ch, curdig)
+
+        curdig -= 1
+        if curdig < 0: break
+
+DS = 10
+cur_time = datetime.datetime.now()
+nxt_time = cur_time + datetime.timedelta(seconds=DS)
+
+
+msg = "DREAD"
+gif_fn = "gif/Cylon.gif"
+
+gif_idx = 0
+gif_fns = [ "gif/Cylon.gif", "gif/scanline.gif", "gif/sinewave.gif", "gif/trianglewave.gif" ]
+
+while True:
+  cur_time = datetime.datetime.now()
+  if cur_time > nxt_time:
+    cur_time = datetime.datetime.now()
+    nxt_time = cur_time + datetime.timedelta(seconds=DS)
+
+    gif_idx = (gif_idx + 1) % len(gif_fns)
+    gif_fn = gif_fns[gif_idx]
+    gif_fn = "gif/trianglewave.gif"
+    
+  animate_gif_tick(ctx, gif_fn)
+  #mask_message(ctx, msg)
+  ctx["pix"].show()
+  time.sleep(1.0/240.0)
+
+  pass
+
+mode = int(5.0*random.random())
+
+msgidx = int(len(words)*random.random())
+msg = words[msgidx]
+print(msg, msgidx)
+
+mode_name = [ "rand_color", "fade", "meteor", "rainbow", "fire", "running_lights" ]
+
+print(cur_time, nxt_time)
+
+msg_dt = 10
+msg_cur_t = datetime.datetime.now()
+msg_nxt_t = msg_cur_t + datetime.timedelta(seconds=msg_dt)
+
+rgb = [255,255,255]
+
+timefactor = 1
+rdt = 1.0/60.0
+
+dt = 1.0/60.0
+while True:
+  msg_cur_t = datetime.datetime.now()
+  cur_time = datetime.datetime.now()
+
+  if msg_cur_t > msg_nxt_t:
+    msg_cur_t = datetime.datetime.now()
+    msg_nxt_t = msg_cur_t + datetime.timedelta(seconds=msg_dt)
+
+    msgidx = int(float(len(words))*random.random())
+    msg = words[msgidx]
+
+    if (random.random() < 0.5):
+      msg = msg.upper()
+
+    print(msg, msgidx)
+  
+  if cur_time > nxt_time:
+    cur_time = datetime.datetime.now()
+    nxt_time = cur_time + datetime.timedelta(seconds=DS)
+
+    mode += 1
+    mode %= 6
+
+    rgb = [
+      int(random.random()*255.0),
+      int(random.random()*255.0),
+      int(random.random()*255.0) ]
+
+    print("mode:", mode_name[mode])
+
+    rdt = 1.0 / (20.0 + ((60.0-20.0)*random.random()))
+    timefactor = 0.5 + (3.0*random.random())
+
+
+  if mode==0:
+    rand_color_tick(ctx)
+  elif mode == 1:
+    fade_tick(ctx, rgb, timefactor)
+  elif mode == 2:
+    meteor_tick(ctx, rgb)
+  elif mode == 3:
+    rainbow_tick(ctx, rdt)
+  elif mode == 4:
+    fire_tick(ctx)
+  elif mode == 5:
+    running_lights_tick(ctx, rgb, dt, 8.0)
+
+  #mask_message(ctx, msg)
+  ctx["pix"].show()
+  time.sleep(1.0/120.0)
+
