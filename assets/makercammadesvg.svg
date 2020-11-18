@@ -1,0 +1,85 @@
+<?xml version='1.0'?>
+<!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN' 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'>
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='19.321711824375747in' height='27.83125911204047in' viewBox='0 0 19.321711824375747 27.83125911204047'>
+<metadata>
+<cutobject type="followpath" unit="imperial" name="follow%20path%201" safetyheight="0.75" stocksurface="0" targetdepth="-0.85" stepover="NaN" stepdown="0.15" feedrate="25" plungerate="30" tooldiameter="0.25" roughingclearance="NaN" outside="true" direction="1" >
+<path>path10</path>
+<path>path15</path>
+</cutobject>
+<cutobject type="followpath" unit="imperial" name="follow%20path%202" safetyheight="0.75" stocksurface="0" targetdepth="-0.85" stepover="NaN" stepdown="0.15" feedrate="25" plungerate="30" tooldiameter="0.25" roughingclearance="NaN" outside="true" direction="1" >
+<path>path9</path>
+<path>path13</path>
+<path>path16</path>
+</cutobject>
+<cutobject type="followpath" unit="imperial" name="follow%20path%203" safetyheight="0.75" stocksurface="0" targetdepth="-0.85" stepover="NaN" stepdown="0.15" feedrate="25" plungerate="30" tooldiameter="0.25" roughingclearance="NaN" outside="true" direction="1" >
+<path>path11</path>
+<path>path12</path>
+<path>path14</path>
+</cutobject>
+<cutobject type="followpath" unit="imperial" name="follow%20path%204" safetyheight="0.75" stocksurface="0" targetdepth="-0.85" stepover="NaN" stepdown="0.15" feedrate="25" plungerate="30" tooldiameter="0.25" roughingclearance="NaN" outside="true" direction="1" >
+<path>path17</path>
+<path>path18</path>
+<path>path19</path>
+</cutobject>
+<cutobject type="followpath" unit="imperial" name="follow%20path%205" safetyheight="0.75" stocksurface="0" targetdepth="-0.85" stepover="NaN" stepdown="0.15" feedrate="25" plungerate="30" tooldiameter="0.25" roughingclearance="NaN" outside="true" direction="1" >
+<path>path21</path>
+<path>path24</path>
+<path>path25</path>
+</cutobject>
+<cutobject type="followpath" unit="imperial" name="follow%20path%206" safetyheight="0.75" stocksurface="0" targetdepth="-0.85" stepover="NaN" stepdown="0.15" feedrate="25" plungerate="30" tooldiameter="0.25" roughingclearance="NaN" outside="true" direction="1" >
+<path>path20</path>
+<path>path22</path>
+<path>path23</path>
+<path>path26</path>
+<path>path27</path>
+</cutobject>
+<cutobject type="profile" unit="imperial" name="profile%207" safetyheight="0.75" stocksurface="0" targetdepth="-0.85" stepover="NaN" stepdown="0.15" feedrate="25" plungerate="30" tooldiameter="0.25" roughingclearance="NaN" outside="false" direction="1" >
+<path>path1</path>
+<path>path2</path>
+</cutobject>
+<cutobject type="profile" unit="imperial" name="profile%208" safetyheight="0.75" stocksurface="0" targetdepth="-0.85" stepover="NaN" stepdown="0.15" feedrate="25" plungerate="30" tooldiameter="0.25" roughingclearance="NaN" outside="false" direction="1" >
+<path>path3</path>
+<path>path4</path>
+</cutobject>
+<cutobject type="profile" unit="imperial" name="profile%209" safetyheight="0.75" stocksurface="0" targetdepth="-0.85" stepover="NaN" stepdown="0.15" feedrate="25" plungerate="30" tooldiameter="0.25" roughingclearance="NaN" outside="false" direction="1" >
+<path>path5</path>
+<path>path6</path>
+</cutobject>
+<cutobject type="profile" unit="imperial" name="profile%2010" safetyheight="0.75" stocksurface="0" targetdepth="-0.85" stepover="NaN" stepdown="0.15" feedrate="25" plungerate="30" tooldiameter="0.25" roughingclearance="NaN" outside="false" direction="1" >
+<path>path7</path>
+<path>path8</path>
+</cutobject>
+<cutobject type="profile" unit="imperial" name="profile%2011" safetyheight="0.75" stocksurface="0" targetdepth="-0.85" stepover="NaN" stepdown="0.15" feedrate="25" plungerate="30" tooldiameter="0.25" roughingclearance="NaN" outside="true" direction="1" >
+<path>path0</path>
+</cutobject>
+</metadata>
+
+<path id='path0' stroke='black' fill='none' stroke-width='0.02' d='M4.419649125597459 2.842170943040401e-14 L4.180737319276826 0.21837794702422286 L3.5340530800383263 0.8094684826911447 L2.957342855170417 1.3365826420844797 L2.071746809611284 2.1459763216279555 L2.044756652662272 2.454783400136961 L1.1536243867396792 12.579121717083469 L2.380555858650478 13.915629556020264 L0.9183263598754684 15.252212198104717 L-0.000026771653011792296 25.685282790412572 L0.20043779132996775 25.903664674444546 L1.2269818656105969 27.021865432497023 L1.9700920872029144 27.8312591120405 L2.2807464117963328 27.8312591120405 L14.902085927124292 27.8312591120405 L15.787681972683426 27.021865432497023 L17.24998824311047 25.685282790412572 L17.276978400059484 25.37655051505122 L18.168110665982077 15.252212198104717 L16.941102422419245 13.915629556020264 L18.403408692846288 12.579121717083469 L19.321685052722735 2.1459763216279697 L19.12129726139179 1.92766924074364 L18.57865160278245 1.336582642084494 L18.094676415459126 0.8094684826911589 L17.351642965518842 4.263256414560601e-14 L4.419649125597459 2.842170943040401e-14 Z'/>
+<path id='path1' stroke='black' fill='none' stroke-width='0.02' d='M6.908806950614039 3.727389665947811 L9.496850994156478 3.727389665947811 L8.611332113950159 4.536783345491287 L8.408483692746387 6.84139352122331 L6.908806950614039 3.727389665947811 Z'/>
+<path id='path2' stroke='black' fill='none' stroke-width='0.02' d='M11.618221818538943 3.727389665947811 L14.206265862081384 3.727389665947811 L12.158483618927493 6.841318718075655 L12.361254874778451 4.536783345491287 L12.16079070549625 4.318480201614733 L11.618221818538943 3.727389665947811 Z'/>
+<path id='path3' stroke='black' fill='none' stroke-width='0.02' d='M5.206127850273077 9.140086374275981 L6.608532940776914 12.051932754542475 L4.949914863190656 12.051932754542475 L5.206127850273077 9.140086374275981 Z'/>
+<path id='path4' stroke='black' fill='none' stroke-width='0.02' d='M14.956143012674351 9.140086374275981 L14.699776088587088 12.051932754542475 L13.04115801100083 12.051932754542475 L14.956143012674351 9.140086374275981 Z'/>
+<path id='path5' stroke='black' fill='none' stroke-width='0.02' d='M4.621805027129827 15.779326357498036 L6.280423498416866 15.779326357498036 L4.365438103042564 18.69125147791995 L4.621805027129827 15.779326357498036 Z'/>
+<path id='path6' stroke='black' fill='none' stroke-width='0.02' d='M12.713048174940004 15.779326357498036 L14.371743417879072 15.779326357498036 L14.115376493791809 18.69125147791995 L12.713048174940004 15.779326357498036 Z'/>
+<path id='path7' stroke='black' fill='none' stroke-width='0.02' d='M7.163097496789426 20.989940393964854 L6.960249469286435 23.29447182954145 L7.703359690878752 24.10386550908493 L5.115315253635533 24.10386550908493 L7.163097496789426 20.989940393964854 Z'/>
+<path id='path8' stroke='black' fill='none' stroke-width='0.02' d='M10.91309742297053 20.989940393964854 L12.412774558803658 24.10379070593729 L9.82473012156044 24.10379070593729 L10.71024939546754 23.29439702639381 L10.737316324068583 22.985586010877043 L10.91309742297053 20.989940393964854 Z'/>
+<path id='path9' stroke='black' fill='none' stroke-width='0.02' d='M16.958757933882715 1.3945909082784809 L18.196194917397737 0.1571539328831264'/>
+<path id='path10' stroke='black' fill='none' stroke-width='0.02' d='M3.9549955914370942 3.043123542175266 L5.1924325749521145 1.8056865667799116'/>
+<path id='path11' stroke='black' fill='none' stroke-width='0.02' d='M3.6999149 11.822766999999999 L5.4499149 11.822766999999999'/>
+<path id='path12' stroke='black' fill='none' stroke-width='0.02' d='M6.1298849 11.822766999999999 L7.8798849 11.822766999999999'/>
+<path id='path13' stroke='black' fill='none' stroke-width='0.02' d='M8.9147947 3.935722900000002 L10.664795 3.935722900000002'/>
+<path id='path14' stroke='black' fill='none' stroke-width='0.02' d='M10.494836 11.822766999999999 L12.244836 11.822766999999999'/>
+<path id='path15' stroke='black' fill='none' stroke-width='0.02' d='M5.7481585 3.935722900000002 L7.4981585 3.935722900000002'/>
+<path id='path16' stroke='black' fill='none' stroke-width='0.02' d='M15.13377 3.935722900000002 L16.88377 3.935722900000002'/>
+<path id='path17' stroke='black' fill='none' stroke-width='0.02' d='M15.125639859731498 13.713298458968572 L16.363076843246517 12.475861483573215'/>
+<path id='path18' stroke='black' fill='none' stroke-width='0.02' d='M3.1361438359026805 15.358613376414375 L4.373581016268091 14.12117640101902'/>
+<path id='path19' stroke='black' fill='none' stroke-width='0.02' d='M8.71686951344745 13.91562955602025 L10.716869474077372 13.91562955602025'/>
+<path id='path20' stroke='black' fill='none' stroke-width='0.02' d='M2.7276855 23.895533 L4.318994 23.895533'/>
+<path id='path21' stroke='black' fill='none' stroke-width='0.02' d='M7.207927 15.987659 L8.957927 15.987659'/>
+<path id='path22' stroke='black' fill='none' stroke-width='0.02' d='M8.6421349 23.895533 L10.392135 23.895533'/>
+<path id='path23' stroke='black' fill='none' stroke-width='0.02' d='M11.954682 23.895533 L13.704682 23.895533'/>
+<path id='path24' stroke='black' fill='none' stroke-width='0.02' d='M11.437366 15.987659 L13.187365000000002 15.987659'/>
+<path id='path25' stroke='black' fill='none' stroke-width='0.02' d='M13.871743 15.987659 L15.621743 15.987659'/>
+<path id='path26' stroke='black' fill='none' stroke-width='0.02' d='M14.306788301047474 26.02878829320769 L15.544225284562494 24.79135131781233'/>
+<path id='path27' stroke='black' fill='none' stroke-width='0.02' d='M1.2566456445542196 27.673951635854316 L2.49408262806924 26.43651466045896'/>
+</svg>
