@@ -1,7 +1,13 @@
 Anachronoplex
 ===
 
-A large 14 segment RGB display
+A large 14 segment RGB display.
+
+![animated anachronoplex](img/acp-anim.gif)
+
+![anachronoplex purple](img/acp-0.jpg)
+
+![anachronoplex blue](img/acp-1.jpg)
 
 [@star_carcass](https://www.instagram.com/star_carcass/)
 
