@@ -4,7 +4,7 @@ Raspberry Pi Setup Notes
 Wiring
 ---
 
-![RPi Wiring](img/led_strips_raspi_NeoPixel_powered_bb.jpg)
+![RPi Wiring](/img/led_strips_raspi_NeoPixel_powered_bb.jpg)
 
 (from Adafruit's guide ["NeoPixels on Raspberyy Pi"](https://learn.adafruit.com/neopixels-on-raspberry-pi/raspberry-pi-wiring))
 
